@@ -1,7 +1,7 @@
-# Migdal Client Analytics - Submission Summary
+**Tools used:** Python served as the core language. Streamlit was chosen to rapidly build an interactive web app without writing custom HTML/JS. Pandas handles the chronological data sorting efficiently, Plotly powers the responsive charts, and openpyxl generates the native Excel exports.
 
-**Tools Chosen:** I selected Python with Streamlit for rapidly building a clean, interactive web application without needing separate frontend code. Pandas handles the complex data processing efficiently, while Plotly provides beautiful, responsive charting. Openpyxl was chosen to handle the required generation of native Excel exports correctly.
+**Dashboard display:** Features an executive UI with four key metrics, sidebar filters, a satisfaction histogram, and a monthly churn trend chart.
 
-**Dashboard Display:** The executive UI is designed for a non-technical CEO. It features high-level metric cards (Total summary, Active Clients, Avg Satisfaction, Total Portfolio Value) and interactive sidebar filters to slice the data. Visually, it includes a histogram representing the distribution of client satisfaction and a monthly line chart tracking churn trends.
-
-**Data Correction Implementation:** The backend engine uses Pandas to parse the Israeli date strings (`%d/%m/%Y`), and then sorts the entire dataset strictly by the chronological array of true Join Dates (`תאריך_הצטרפות`). Once in time-order, the script sequentially maps new `client_id` strings onto every row starting from `C1000`. This corrected dataframe is then rendered to an in-memory byte buffer via `openpyxl`, safely bypassing the disk entirely before being served to the user via the `st.download_button`.
+**Data correction logic:** Pandas converts `תאריך_הצטרפות` to datetime and sorts the dataset strictly chronologically. 
+Sequential `client_id`s starting from `C1000` are then mapped onto the sorted rows. 
+The corrected dataframe is generated as an in-memory Excel file and provided via a one-click download button.
