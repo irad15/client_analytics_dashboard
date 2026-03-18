@@ -164,6 +164,47 @@ with chart_cols[1]:
     else:
         st.info("No churn data available for current filters.")
 
+# --- INTERACTIVE DATA EXPLORER ---
+st.markdown("---")
+st.subheader("Interactive Data Explorer")
+
+x_axis_map = {
+    "City": "עיר",
+    "Gender": "מגדר",
+    "Service Type": "סוג_שירות",
+    "Status": "סטטוס"
+}
+
+y_axis_map = {
+    "Client Count": ("client_id", "count"),
+    "Avg Response Time (hrs)": ("זמן_תגובה_ממוצע_שעות", "mean"),
+    "Total Portfolio": ("סכום_תיק", "sum"),
+    "Total Monthly Revenue": ("הכנסה_חודשית", "sum")
+}
+
+col_exp_1, col_exp_2 = st.columns(2)
+with col_exp_1:
+    x_selection = st.selectbox("Select Category (X-Axis)", options=list(x_axis_map.keys()))
+with col_exp_2:
+    y_selection = st.selectbox("Select Metric (Y-Axis)", options=list(y_axis_map.keys()))
+
+x_col = x_axis_map[x_selection]
+y_col, agg_func = y_axis_map[y_selection]
+
+# Execute pandas aggregation logic dynamically based on user selection
+if agg_func == "count":
+    grouped_df = filtered_df.groupby(x_col).size().reset_index(name='Value')
+else:
+    grouped_df = filtered_df.groupby(x_col)[y_col].agg(agg_func).reset_index(name='Value')
+
+# Initialize and render the Plotly Bar Chart
+fig_explorer = px.bar(grouped_df, x=x_col, y='Value', 
+                      title=f"{y_selection} by {x_selection}",
+                      labels={'Value': y_selection, x_col: x_selection},
+                      color=x_col, color_discrete_sequence=px.colors.qualitative.Pastel)
+                      
+st.plotly_chart(fig_explorer, width="stretch")
+
 # --- DATA EXPLORATION ---
 st.markdown("---")
 with st.expander("Raw Data Sample", expanded=False):
