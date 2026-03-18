@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import base64
+import io
 
 # --- PAGE CONFIGURATION ---
 # Sets the browser tab title, favicon icon, and expands the layout to full width
@@ -20,6 +21,28 @@ def get_base64_img(file_path):
         return base64.b64encode(data).decode()
     except Exception:
         return None
+
+@st.cache_data
+def generate_corrected_excel(df):
+    """Sorts data by Join Date, assigns new sequential client_ids (C1000+), and exports to Excel."""
+    export_df = df.copy()
+    
+    # 1. Sort chronologically by Join Date (assuming it is datetime because of load_data)
+    export_df = export_df.sort_values(by='תאריך_הצטרפות', ascending=True)
+    
+    # 2. Re-assign client_id starting from C1000
+    export_df['client_id'] = [f"C{1000 + i}" for i in range(len(export_df))]
+    
+    # 3. Format dates back to string format for the Excel output matching the original CSV format
+    export_df['תאריך_הצטרפות'] = export_df['תאריך_הצטרפות'].dt.strftime('%d/%m/%Y')
+    export_df['תאריך_נטישה'] = export_df['תאריך_נטישה'].dt.strftime('%d/%m/%Y').fillna('')
+    
+    # Write to an in-memory BytesIO buffer as Excel using openpyxl
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        export_df.to_excel(writer, index=False, sheet_name='Corrected Data')
+        
+    return output.getvalue()
 
 # --- CUSTOM STYLING ---
 # Injecting subtle CSS to give metric cards a clean, executive look
@@ -70,6 +93,20 @@ with st.sidebar:
             """,
             unsafe_allow_html=True
         )
+        
+    # --- TASK B: DATA CORRECTION ---
+    st.subheader("Data Correction")
+    st.write("Chronologically sorts 'Join Dates' and re-assigns `client_id`s starting at `C1000`.")
+    excel_data = generate_corrected_excel(df)
+    st.download_button(
+        label="📥 Download Corrected Excel",
+        data=excel_data,
+        file_name="corrected_clients_data.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True
+    )
+    st.markdown("---")
+
 # These allow the CEO to slice the data by their primary categories
 st.sidebar.header("Filter Data")
 
@@ -95,9 +132,9 @@ col4.metric("Total Portfolio (NIS)", f"₪{filtered_df['סכום_תיק'].sum():
 st.markdown("---")
 
 # --- VISUALIZATIONS ---
-col_charts_1, col_charts_2 = st.columns(2)
+chart_cols = st.columns(2)
 
-with col_charts_1:
+with chart_cols[0]:
     # Distribution Chart: Viewing how satisfied clients are on a scale of 1-10
     st.subheader("Satisfaction Distribution")
     fig_sat = px.histogram(filtered_df, x="שביעות_רצון", nbins=10, 
@@ -108,7 +145,7 @@ with col_charts_1:
     # Applying 'stretch' to use full container width as per latest Streamlit standards
     st.plotly_chart(fig_sat, width="stretch")
 
-with col_charts_2:
+with chart_cols[1]:
     # Trend Chart: Visualizing churn events over time to identify negative patterns
     st.subheader("Churn Over Time")
     churn_df = filtered_df.dropna(subset=['תאריך_נטישה']).copy()
@@ -129,6 +166,6 @@ with col_charts_2:
 
 # --- DATA EXPLORATION ---
 st.markdown("---")
-st.subheader("Raw Data Sample")
-# Displaying the top 100 results for a quick sanity check of the values
-st.dataframe(filtered_df.head(100))
+with st.expander("Raw Data Sample", expanded=False):
+    # Displaying the top 100 results for a quick sanity check of the values
+    st.dataframe(filtered_df.head(100))
