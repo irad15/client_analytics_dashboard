@@ -11,7 +11,8 @@ This application was built using **Python, Streamlit, Pandas, Plotly**, and **op
 Developed using `uv` for modern, fast dependency management.
 
 ```bash
-# Install dependencies
+# Set up virtual environment and install dependencies
+uv venv
 uv pip install -r requirements.txt
 
 # Run the app
