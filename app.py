@@ -96,7 +96,7 @@ with st.sidebar:
         
     # --- TASK B: DATA CORRECTION ---
     st.subheader("Data Correction")
-    st.write("Chronologically sorts 'Join Dates' and re-assigns `client_id`s starting at `C1000`.")
+    st.write("Chronologically sorts by 'Join Dates' and re-assigns `client_id`s starting at `C1000`.")
     excel_data = generate_corrected_excel(df)
     st.download_button(
         label="📥 Download Corrected Excel",
