@@ -164,9 +164,9 @@ with chart_cols[1]:
     else:
         st.info("No churn data available for current filters.")
 
-# --- INTERACTIVE DATA EXPLORER ---
+# --- CATEGORY BREAKDOWN EXPLORER ---
 st.markdown("---")
-st.subheader("Interactive Data Explorer")
+st.subheader("Category Breakdown Explorer")
 
 x_axis_map = {
     "City": "עיר",
@@ -177,9 +177,15 @@ x_axis_map = {
 
 y_axis_map = {
     "Client Count": ("client_id", "count"),
+    "Avg Satisfaction (1-10)": ("שביעות_רצון", "mean"),
     "Avg Response Time (hrs)": ("זמן_תגובה_ממוצע_שעות", "mean"),
-    "Total Portfolio": ("סכום_תיק", "sum"),
-    "Total Monthly Revenue": ("הכנסה_חודשית", "sum")
+    "Total Portfolio (NIS)": ("סכום_תיק", "sum"),
+    "Avg Portfolio (NIS)": ("סכום_תיק", "mean"),
+    "Total Monthly Revenue": ("הכנסה_חודשית", "sum"),
+    "Avg Monthly Revenue": ("הכנסה_חודשית", "mean"),
+    "Total Inquiries (Last Year)": ("מספר_פניות_שנה_אחרונה", "sum"),
+    "Avg Inquiries (Last Year)": ("מספר_פניות_שנה_אחרונה", "mean"),
+    "Average Age": ("גיל", "mean")
 }
 
 col_exp_1, col_exp_2 = st.columns(2)
@@ -204,6 +210,60 @@ fig_explorer = px.bar(grouped_df, x=x_col, y='Value',
                       color=x_col, color_discrete_sequence=px.colors.qualitative.Pastel)
                       
 st.plotly_chart(fig_explorer, width="stretch")
+
+
+# --- NUMERIC CORRELATION EXPLORER ---
+st.markdown("---")
+st.subheader("Numeric Correlation Explorer")
+
+# We only include the strictly numerical columns here
+numeric_map = {
+    "Age": "גיל",
+    "Portfolio Amount": "סכום_תיק",
+    "Monthly Revenue": "הכנסה_חודשית",
+    "Inquiries (Last Year)": "מספר_פניות_שנה_אחרונה",
+    "Avg Response Time (hrs)": "זמן_תגובה_ממוצע_שעות",
+    "Satisfaction (1-10)": "שביעות_רצון"
+}
+
+col_num1, col_num2 = st.columns(2)
+with col_num1:
+    # Exclude Satisfaction and Inquiries for the X-Axis
+    x_options = [k for k in numeric_map.keys() if k not in ("Satisfaction (1-10)", "Inquiries (Last Year)")]
+    x_num_sel = st.selectbox("Select X-Axis", options=x_options, index=0)
+with col_num2:
+    y_num_sel = st.selectbox("Select Y-Axis", options=list(numeric_map.keys()), index=5)
+
+x_num_col = numeric_map[x_num_sel]
+y_num_col = numeric_map[y_num_sel]
+
+if x_num_sel == y_num_sel:
+    st.warning("Please select two different metrics to see a correlation.")
+else:
+    try:
+        # Drawing the scatter plot with opacity to prevent the "barcode" overplotting look
+        fig_scatter = px.scatter(filtered_df, x=x_num_col, y=y_num_col, 
+                                 opacity=0.3, trendline="ols",
+                                 title=f"Correlation: {y_num_sel} vs {x_num_sel}",
+                                 labels={x_num_col: x_num_sel, y_num_col: y_num_sel},
+                                 color_discrete_sequence=["#9B59B6"])
+        
+        # Make the trendline bright red
+        fig_scatter.data[1].line.color = 'red'
+        fig_scatter.data[1].line.width = 3
+        
+    except Exception:
+        # Fallback if statsmodels is not installed
+        fig_scatter = px.scatter(filtered_df, x=x_num_col, y=y_num_col, 
+                                 opacity=0.3,
+                                 title=f"Correlation: {y_num_sel} vs {x_num_sel}",
+                                 labels={x_num_col: x_num_sel, y_num_col: y_num_sel},
+                                 color_discrete_sequence=["#9B59B6"])
+        st.info("💡 Run `uv pip install statsmodels` in your terminal to see the red trendline.")
+
+    st.plotly_chart(fig_scatter, width="stretch")
+
+
 
 # --- DATA EXPLORATION ---
 st.markdown("---")

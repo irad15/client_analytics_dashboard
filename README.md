@@ -4,7 +4,7 @@ An interactive Streamlit dashboard built for Migdal Financial Services to analyz
 
 ## Project Description
 This application was built using **Python, Streamlit, Pandas, Plotly**, and **openpyxl** for Excel exports. 
-- **Dashboard (Task A)**: Features an executive-level UI with metric cards (Total Clients, Active, Avg Satisfaction, Portfolio Value), sidebar filters (City, Service, Status), and interactive Plotly visualizations for satisfaction distribution and monthly churn trends. 
+- **Dashboard (Task A)**: Features an executive UI with KPI cards, sidebar filters, mandatory distribution/churn trend charts, plus two advanced interactive features: a **Category Breakdown Explorer** (grouping bar charts) and a **Numeric Correlation Explorer** (dynamically rendering scatter plots with OLS trendlines).
 - **Data Correction (Task B)**: Implemented a chronological re-ordering engine. It converts Join Dates to datetime objects, sorts the entire dataset, and re-assigns `client_id`s starting from `C1000` to ensure ID order matches join order. This is accessible via a one-click Excel download button in the sidebar.
 
 ## Installation & Running

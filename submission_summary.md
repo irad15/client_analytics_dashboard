@@ -1,6 +1,6 @@
 **Tools used:** Python served as the core language. Streamlit was chosen to rapidly build an interactive web app without writing custom HTML/JS. Pandas handles the chronological data sorting efficiently, Plotly powers the responsive charts, and openpyxl generates the native Excel exports.
 
-**Dashboard display:** Features an executive UI with key metrics, sidebar filters, a satisfaction histogram, and a monthly churn trend chart.
+**Dashboard display:** Features an executive UI with key metrics, sidebar filters, required distribution/trend charts, plus an interactive Category Breakdown Explorer and a Numeric Correlation Engine (scatter plots with OLS trendlines).
 
 **Data correction logic:** Pandas converts `תאריך_הצטרפות` to datetime and sorts the dataset strictly chronologically. 
 Sequential `client_id`s starting from `C1000` are then mapped onto the sorted rows. 
